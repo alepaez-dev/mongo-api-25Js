@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 
 // App de express
 const app = express();
+app.use(express.json());
+
 // Url de base de datos
 const databaseURL = "mongodb+srv://ale:a123456@kodemia.fh2syr1.mongodb.net/kodemia"
 
@@ -75,6 +77,30 @@ app.get("/koders", async (req, res) => {
   }
 })
 
+// Crear un koder
+app.post("/koders", async (req, res) => {
+  console.log("body -->", req.body)
+  /**
+   * - Request -
+   * Params
+   * Query params
+   * Body
+   */
+  try {
+    const koder = await Koder.create(req.body)
+    console.log("koder", koder);
+    res.status(201);
+    res.json({
+      success: true,
+      data: koder
+    })
+  } catch(err) {
+    res.json({
+      success: false,
+      message: err.message
+    })
+  }
+})
 // Conectar a la base de datos
 mongoose.connect(databaseURL)
 .then(() => {
