@@ -88,19 +88,27 @@ app.post("/koders", async (req, res) => {
    */
   try {
     const koder = await Koder.create(req.body)
-    console.log("koder", koder);
     res.status(201);
     res.json({
       success: true,
       data: koder
     })
   } catch(err) {
+    res.status(400);
     res.json({
       success: false,
       message: err.message
     })
   }
 })
+
+/**
+ * Endpoint donde pueda encontrar el koder por su id.
+ * /recurso/identificador
+ * method: 
+ * ruta: 
+ * Model.findById()
+ */
 // Conectar a la base de datos
 mongoose.connect(databaseURL)
 .then(() => {
