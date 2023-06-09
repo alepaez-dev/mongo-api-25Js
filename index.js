@@ -6,7 +6,6 @@ const app = express();
 // Url de base de datos
 const databaseURL = "mongodb+srv://ale:a123456@kodemia.fh2syr1.mongodb.net/kodemia"
 
-
 /**
  * 1. Conectarse a la base de datos
  * 2. Levantar el servidor
@@ -52,19 +51,30 @@ app.get("/", (req, res) => {
   res.json("Estamos en el endpoint de HOME");
 })
 
+// Query params 
+
+/**
+ * path params -> request.params
+ * query params -> request.query
+ */
 app.get("/koders", async (req, res) => {
-  console.log("aaaaaa");
   // Accedemos a nuestra bd
-  const koders = await Koder.find();
-  console.log("koders", koders)
+  try {
+    // Todo lo que podia fallar
+    const koders = await Koder.find(req.query); // { name: "Karla" }
+    res.json({
+      success: true,
+      data: koders
+    })
+  }catch(err) {
+    res.status(400)
+    res.json({
+      success: false,
+      message: err.message
+    })
+  }
 })
 
-app.post("/koders", async (req, res) => {
-  // Accedemos a nuestra bd
-  const koder = await Koder.create(req.body);
-  console.log("koder", koder)
-  return koder
-})
 // Conectar a la base de datos
 mongoose.connect(databaseURL)
 .then(() => {
