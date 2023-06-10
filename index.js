@@ -7,25 +7,30 @@ const app = express();
 
 // Parseo a json -> Middleware
 
-
-
 // Primer middleware
 app.use(express.json());
 
 // Segundo middleare
 app.use((request, response, next) => {
   console.log("Primer middleware");  
-  next() // Continuar
+  next("Contestando desde el segundo middleware") // Continuar
 })
 app.use((request, response, next) => {
   console.log("segundo middleware");
   next();
 })
 
+const segundoMiddlewareEncapsulado = (request, response, next) => {
+  console.log("Middleware que solo tiene que pasar en enlistar koders");  
+  next() // Continuar
+}
+
+
+// Un middleare para endpoints en especifcos
 const middlewareEncapsulado = (req, res, next) => {
   console.log("Middleware encapsulado para un endpoint en especifico");
   // next();
-}
+};
 /**
  * Middlewares
  * - Nos sirve para poder realizar codigo antes de los endpoints.
@@ -90,7 +95,11 @@ app.get("/", (req, res) => {
  * path params -> request.params
  * query params -> request.query
  */
-app.get("/koders", async (req, res) => {
+
+/**
+ * endpoint -> ruta, callback ->>>>>>>>>>>>>> ruta, middleware, callback
+ */
+app.get("/koders", middlewareEncapsulado, async (req, res) => {
   // Accedemos a nuestra bd
   try {
     // Todo lo que podia fallar
@@ -109,9 +118,9 @@ app.get("/koders", async (req, res) => {
 })
 
 // Crear un koder
-// parametros -> ruta, callback
+// parametros con normalidad -> ruta, callback
 // si queremos un middleware para ese endpoint en especifico, se pone como 2do parametro
-// ruta, middleware, callback
+// parametros con middleware -> ruta, middleware, callback
 app.post("/koders", middlewareEncapsulado, async (req, res) => {
   console.log("body en el endpoint de POST-->", req.body)
   /**
@@ -135,6 +144,29 @@ app.post("/koders", middlewareEncapsulado, async (req, res) => {
     })
   }
 })
+
+// Actualizar un koder
+// patch/put
+// /koders/:id
+
+app.patch("/koders/:id", async (req, res) => {
+  // destructurar
+  const { body, params } = req;
+  try {
+    //@ts-ignore
+    const updatedKoder = await Koder.findByIdAndUpdate(params.id, body, { returnDocument : "after" });
+    res.status(200).json({
+      success: true,
+      data: updatedKoder
+    })
+  }catch(err) {
+    res.status(400).json({
+      success: false,
+      message: err.message
+    })
+  }
+})
+
 
 /**
  * Endpoint donde pueda encontrar el koder por su id.
@@ -188,3 +220,10 @@ mongoose.connect(databaseURL)
   console.log("No se pudo conectar a la base de datos", err);
 })
 
+/**
+ * Middlewares
+ * 1 - Hacer un middleware para toda la aplicacion que imprima en consola el metodo
+ * 2 - Un middleware para el endpoint de obtener un koder donde imprima en consola 'Obteniendo koder ......'
+ * 3 - Hacer un middleware para el endpoint de crear Koder donde si no nos manda informacion(datos, json) 
+ * REGRESAR "No estas mandado objetos" ->>> para que ni entre al endpoint de crear Koder
+ */
